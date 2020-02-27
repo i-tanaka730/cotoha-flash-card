@@ -1,0 +1,19 @@
+{
+  "name": "study-book",
+  "version": "1.0.0",
+  "description": "My incredible Nuxt.js project",
+  "author": "i-tanaka730",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "nuxt": "^2.0.0",
+    "@nuxtjs/axios": "^5.3.6",
+    "@nuxtjs/dotenv": "^1.4.0"
+  },
+  "devDependencies": {}
+}
