@@ -1,12 +1,7 @@
 <template>
   <div class="container">
     <div>
-<!--{{ users[0].id }},{{ users[0].name }}-->
-      <ul>
-        <li v-for="user in users" :key="user.id">
-          {{ user.id }},{{ user.name }}
-        </li>
-      </ul>
+      {{ items }}
     </div>
   </div>
 </template>
@@ -14,15 +9,76 @@
 <script>
 import axios from 'axios'
 const url = 'https://jsonplaceholder.typicode.com/users'
+const DEVELOPER_API_BASE_URL = "https://api.ce-cotoha.com/api/dev/nlp/"
+const DEVELOPER_API_PARSE_URL = DEVELOPER_API_BASE_URL + "v1/parse"
+const ACCESS_TOKEN_PUBLISH_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens"
 
 export default {
-  asyncData ({ params }) {  //コンポーネントを初期化する前に非同期処理を行えるようにするメソッド
-    return axios.get(url) //apiからのデータ取得をリクエスト
-      .then((res) => {  //thenはレスポンスを受け取った段階で呼ばれるメソッド(res)にはレスポンスデータが入っている
-        return { users: res.data } //res.dataにはjsonオブジェクトが入っている
-      })
+
+data () {
+    return {
+      items: []
+    }
+  },
+
+  async asyncData () {
+
+    // const headers={
+    //     "Content-Type": "application/json"
+    //     }
+
+    // const datas = {
+    //     "grantType": "client_credentials",
+    //     "clientId": "KP6SmzGEDXKlRvf8rUwAgLOoBhzgpCGE",
+    //     "clientSecret": "8PWPSmE90XmD5Ti7"
+    //     }
+
+    // const params = {
+    //     data: datas,
+    //     headers: headers
+    //     }
+
+    const params = {
+      "grantType": "client_credentials",
+      "clientId": "",
+      "clientSecret": ""
+    }
+
+    try {
+      let { data } = await axios.post(ACCESS_TOKEN_PUBLISH_URL, params)
+
+      const headers={
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + data.access_token
+          }
+
+      const params2 = {
+        "sentence": "僕は今プログラミングをしています"
+      }
+  console.log("==============================")
+  console.log(data.access_token)
+
+    data = await axios.post(DEVELOPER_API_PARSE_URL,
+          params2,
+          {
+            headers:{
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + data.access_token
+            }
+          })
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaa")
+  console.log(data.data.result)
+
+      return {
+          items : data.data.result
+      }
+    } catch (err) {
+          console.log("例外発生時の処理")
+          console.log(err)
+    }
   }
 }
+
 </script>
 
 <style>
