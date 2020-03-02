@@ -23,61 +23,43 @@ data () {
 
   async asyncData () {
 
-    // const headers={
-    //     "Content-Type": "application/json"
-    //     }
-
-    // const datas = {
-    //     "grantType": "client_credentials",
-    //     "clientId": "KP6SmzGEDXKlRvf8rUwAgLOoBhzgpCGE",
-    //     "clientSecret": "8PWPSmE90XmD5Ti7"
-    //     }
-
-    // const params = {
-    //     data: datas,
-    //     headers: headers
-    //     }
-
-    const params = {
-      "grantType": "client_credentials",
-      "clientId": "",
-      "clientSecret": ""
-    }
-
     try {
-      let { data } = await axios.post(ACCESS_TOKEN_PUBLISH_URL, params)
 
-      const headers={
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + data.access_token
-          }
-
-      const params2 = {
-        "sentence": "僕は今プログラミングをしています"
+      const tokenHeaders = {
+          "Content-Type": "application/json"
       }
-  console.log("==============================")
-  console.log(data.access_token)
 
-    data = await axios.post(DEVELOPER_API_PARSE_URL,
-          params2,
-          {
+      const tokenDatas = {
+        "grantType": "client_credentials",
+        "clientId": "",
+        "clientSecret": ""
+      }
+
+      let { data } = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
+
+      const parseHeaders = {
             headers:{
               "Content-Type": "application/json",
               "Authorization": "Bearer " + data.access_token
             }
-          })
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaa")
-  console.log(data.data.result)
+          }
 
-      return {
-          items : data.data.result
+      const parseDatas = {
+        "sentence": "僕は今プログラミングをしています"
       }
+
+      data = await axios.post(DEVELOPER_API_PARSE_URL, parseDatas, parseHeaders)
+
+      return { items : data.data.result }
+
     } catch (err) {
-          console.log("例外発生時の処理")
+          console.log("例外発生")
           console.log(err)
     }
   }
 }
+
+
 
 </script>
 
