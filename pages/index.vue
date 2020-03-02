@@ -8,14 +8,17 @@
 
 <script>
 import axios from 'axios'
+import Enumerable from 'linq';
+
 const url = 'https://jsonplaceholder.typicode.com/users'
 const DEVELOPER_API_BASE_URL = "https://api.ce-cotoha.com/api/dev/nlp/"
 const DEVELOPER_API_PARSE_URL = DEVELOPER_API_BASE_URL + "v1/parse"
+const DEVELOPER_API_KEYWORD_URL = DEVELOPER_API_BASE_URL + "v1/keyword"
 const ACCESS_TOKEN_PUBLISH_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens"
 
 export default {
 
-data () {
+  data () {
     return {
       items: []
     }
@@ -26,9 +29,10 @@ data () {
     try {
 
       const tokenHeaders = {
+        headers:{
           "Content-Type": "application/json"
+        }
       }
-
       const tokenDatas = {
         "grantType": "client_credentials",
         "clientId": "",
@@ -38,17 +42,30 @@ data () {
       let { data } = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
 
       const parseHeaders = {
-            headers:{
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + data.access_token
-            }
-          }
-
-      const parseDatas = {
-        "sentence": "僕は今プログラミングをしています"
+        headers:{
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + data.access_token
+        }
       }
 
-      data = await axios.post(DEVELOPER_API_PARSE_URL, parseDatas, parseHeaders)
+      //const document = "NTTが提供する、自然言語解析APIはCOTOHA APIである。"
+      //const document = "関係から特定の属性だけを取り出す演算は射影である。"
+      //const document = "ドラえもんの道具のうち、最も人気のあるものはタケコプターである。"
+      const document = "受賞する人はi-tanaka730である"
+
+      const parseDatas = {
+        "document": document,
+        "max_keyword_num": 1
+      }
+
+      data = await axios.post(DEVELOPER_API_KEYWORD_URL, parseDatas, parseHeaders)
+
+      // const tokens = Enumerable.from(data.data.result).selectMany(r => r.tokens)
+      // const nounObjects = Enumerable.from(tokens).where(t => t.pos == "名詞").toArray()
+      // const nouns = Enumerable.from(nounObjects).select(t => t.lemma).toArray()
+console.log("-----------------------")
+console.log(data)
+
 
       return { items : data.data.result }
 
