@@ -1,6 +1,9 @@
 <template>
   <div class="container">
     <div>
+      <button v-on:click="updateQuestion"></button>
+    </div>
+    <div>
       {{ items }}
     </div>
   </div>
@@ -20,63 +23,77 @@ export default {
 
   data () {
     return {
-      items: []
+      items: [],
+      index: 0
     }
   },
 
-  async asyncData () {
+  methods: {
+    updateQuestion: function(){
+      var min = 0 ;
+      var max = items.len;
+      var a = Math.floor( Math.random() * (max + 1 - min) ) + min ;
+      return { index : a }
+      //this.message = this.message.split('').reverse().join('');
+    }
+  },
+
+async asyncData () {
 
     try {
 
-      const tokenHeaders = {
-        headers:{
-          "Content-Type": "application/json"
-        }
-      }
-      const tokenDatas = {
-        "grantType": "client_credentials",
-        "clientId": "",
-        "clientSecret": ""
-      }
-
-      let { data } = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
-
-      const parseHeaders = {
-        headers:{
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + data.access_token
-        }
-      }
-
-      //const document = "NTTが提供する、自然言語解析APIはCOTOHA APIである。"
-      //const document = "関係から特定の属性だけを取り出す演算は射影である。"
-      //const document = "ドラえもんの道具のうち、最も人気のあるものはタケコプターである。"
-      const document = "受賞する人はi-tanaka730である"
-
-      const parseDatas = {
-        "document": document,
-        "max_keyword_num": 1
-      }
-
-      data = await axios.post(DEVELOPER_API_KEYWORD_URL, parseDatas, parseHeaders)
-
-      // const tokens = Enumerable.from(data.data.result).selectMany(r => r.tokens)
-      // const nounObjects = Enumerable.from(tokens).where(t => t.pos == "名詞").toArray()
-      // const nouns = Enumerable.from(nounObjects).select(t => t.lemma).toArray()
-console.log("-----------------------")
-console.log(data)
-
-
-      return { items : data.data.result }
+      const token = await getAccessToken()
+      const parse = await getKeyword(token)
+      return { items : parse }
 
     } catch (err) {
-          console.log("例外発生")
-          console.log(err)
+      console.log("==========例外発生==========")
+      console.log(err)
     }
   }
 }
 
+async function getAccessToken()
+{
+  const tokenHeaders = {
+    headers:{
+      "Content-Type": "application/json"
+    }
+  }
 
+  const tokenDatas = {
+    "grantType": "client_credentials",
+    "clientId": "	",
+    "clientSecret": ""
+  }
+
+  const tokenResult = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
+  return tokenResult.data.access_token;
+}
+
+async function getKeyword(token, keywordNum = 1)
+{
+  const parseHeaders = {
+    headers:{
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    }
+  }
+
+    const questions = await axios.get('https://cotoha-flash-card.microcms.io/api/v1/question', {
+      headers: { 'X-API-KEY': '' }
+    })
+
+  const document = questions.data.contents[0].question
+
+  const parseDatas = {
+    "document": document,
+    "max_keyword_num": keywordNum
+  }
+
+  const parseResult = await axios.post(DEVELOPER_API_KEYWORD_URL, parseDatas, parseHeaders)
+  return parseResult.data.result[0].form
+}
 
 </script>
 
