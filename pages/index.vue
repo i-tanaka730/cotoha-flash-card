@@ -1,11 +1,11 @@
 <template>
   <div class="container">
-    <div>
-      <button v-on:click="updateQuestion"></button>
-    </div>
-    <div>
-      {{ items }}
-    </div>
+  <b-card tag="article" style="width: 40rem;" class="mb-2">
+    <b-button href="#" variant="primary" v-on:click="showAnswer">答え</b-button>
+    <b-button href="#" variant="primary" v-on:click="updateQuestion">次の問題</b-button>
+    <b-card-text>{{ question }}</b-card-text>
+    <b-card-text>{{ answer }}</b-card-text>
+  </b-card>
   </div>
 </template>
 
@@ -13,44 +13,66 @@
 import axios from 'axios'
 import Enumerable from 'linq';
 
-const url = 'https://jsonplaceholder.typicode.com/users'
 const DEVELOPER_API_BASE_URL = "https://api.ce-cotoha.com/api/dev/nlp/"
 const DEVELOPER_API_PARSE_URL = DEVELOPER_API_BASE_URL + "v1/parse"
 const DEVELOPER_API_KEYWORD_URL = DEVELOPER_API_BASE_URL + "v1/keyword"
 const ACCESS_TOKEN_PUBLISH_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens"
+const MICRO_CMS_QUESTION_URL = "https://cotoha-flash-card.microcms.io/api/v1/question"
+
+const DEVELOPER_API_CRIENT_ID = ""
+const DEVELOPER_API_CRIENT_SECRET = ""
+const MICRO_CMS_API_KEY = ""
 
 export default {
 
   data () {
     return {
-      items: [],
-      index: 0
+      question: "",
+      answer: ""
     }
   },
 
   methods: {
-    updateQuestion: function(){
-      var min = 0 ;
-      var max = items.len;
-      var a = Math.floor( Math.random() * (max + 1 - min) ) + min ;
-      return { index : a }
-      //this.message = this.message.split('').reverse().join('');
+    showAnswer: function() {
+      this.answer = "adsfafd"
     }
   },
 
 async asyncData () {
 
     try {
-
+      const questions = await getAllQuestions()
+      const question = await getQuestion(questions)
       const token = await getAccessToken()
-      const parse = await getKeyword(token)
-      return { items : parse }
+      const keyword = await getKeyword(question, token)
+
+      return {
+        question : question,
+        answer : keyword
+      }
 
     } catch (err) {
       console.log("==========例外発生==========")
       console.log(err)
     }
   }
+}
+
+async function getAllQuestions()
+{
+  const questionResult = await axios.get(MICRO_CMS_QUESTION_URL, {
+    headers: { "X-API-KEY": MICRO_CMS_API_KEY }
+  })
+
+  const questions = Enumerable.from(questionResult.data.contents).select(c => c.question).toArray()
+  return questions
+}
+
+async function getQuestion(questions)
+{
+    var index = Math.floor( Math.random() * questions.length );
+    console.log(questions[index])
+    return questions[index]
 }
 
 async function getAccessToken()
@@ -63,15 +85,15 @@ async function getAccessToken()
 
   const tokenDatas = {
     "grantType": "client_credentials",
-    "clientId": "	",
-    "clientSecret": ""
+    "clientId": DEVELOPER_API_CRIENT_ID,
+    "clientSecret": DEVELOPER_API_CRIENT_SECRET
   }
 
   const tokenResult = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
   return tokenResult.data.access_token;
 }
 
-async function getKeyword(token, keywordNum = 1)
+async function getKeyword(document, token, keywordNum = 1)
 {
   const parseHeaders = {
     headers:{
@@ -79,12 +101,6 @@ async function getKeyword(token, keywordNum = 1)
       "Authorization": "Bearer " + token
     }
   }
-
-    const questions = await axios.get('https://cotoha-flash-card.microcms.io/api/v1/question', {
-      headers: { 'X-API-KEY': '' }
-    })
-
-  const document = questions.data.contents[0].question
 
   const parseDatas = {
     "document": document,
