@@ -15,22 +15,23 @@
 
 <script>
 import axios from 'axios'
-import Enumerable from 'linq';
+import Enumerable from 'linq'
+import Cotoha from './cotoha'
 
-const DEVELOPER_API_KEYWORD_URL = "https://api.ce-cotoha.com/api/dev/nlp/v1/keyword"
-const ACCESS_TOKEN_PUBLISH_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens"
 const MICRO_CMS_QUESTION_URL = "https://cotoha-flash-card.microcms.io/api/v1/question"
-
+const MICRO_CMS_API_KEY = ""
 const DEVELOPER_API_CRIENT_ID = ""
 const DEVELOPER_API_CRIENT_SECRET = ""
-const MICRO_CMS_API_KEY = ""
+
+const cotoha = new Cotoha(DEVELOPER_API_CRIENT_ID, DEVELOPER_API_CRIENT_SECRET)
 
 export default {
 
   async asyncData () {
+
     const questions = await getAllQuestions()
     const question = await getQuestionAtRandom(questions)
-    const answer = await getKeyword(question)
+    const answer = await cotoha.getKeyword(question)
     const emoticonQuestion = await convertEmoticonQuestion(question, answer)
 
     return {
@@ -43,7 +44,7 @@ export default {
   methods: {
     nextQuestion: async function() {
       const question = await getQuestionAtRandom(this.questions)
-      const answer = await getKeyword(question)
+      const answer = await cotoha.getKeyword(question)
       const emoticonQuestion = await convertEmoticonQuestion(question, answer)
 
       this.question = emoticonQuestion
@@ -76,46 +77,6 @@ async function convertEmoticonQuestion(question, answer)
 {
   const emoticonQuestion = question.replace(answer, "＼(^o^)／")
   return emoticonQuestion
-}
-
-async function getAccessToken()
-{
-  const tokenHeaders = {
-    headers:{
-      "Content-Type": "application/json"
-    }
-  }
-
-  const tokenDatas = {
-    "grantType": "client_credentials",
-    "clientId": DEVELOPER_API_CRIENT_ID,
-    "clientSecret": DEVELOPER_API_CRIENT_SECRET
-  }
-
-  const tokenResult = await axios.post(ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
-  const accessToken = tokenResult.data.access_token
-  return accessToken
-}
-
-async function getKeyword(document, keywordNum = 1)
-{
-  const token = await getAccessToken()
-
-  const parseHeaders = {
-    headers:{
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    }
-  }
-
-  const parseDatas = {
-    "document": document,
-    "max_keyword_num": keywordNum
-  }
-
-  const parseResult = await axios.post(DEVELOPER_API_KEYWORD_URL, parseDatas, parseHeaders)
-  const keyword = parseResult.data.result[0].form
-  return keyword
 }
 
 </script>
