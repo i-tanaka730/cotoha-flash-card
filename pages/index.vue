@@ -14,25 +14,24 @@
 </template>
 
 <script>
-import axios from 'axios'
-import Enumerable from 'linq'
-import Cotoha from './cotoha'
 
-const MICRO_CMS_QUESTION_URL = "https://cotoha-flash-card.microcms.io/api/v1/question"
-const MICRO_CMS_API_KEY = ""
-const DEVELOPER_API_CRIENT_ID = ""
-const DEVELOPER_API_CRIENT_SECRET = ""
+import CotohaApi from './cotoha'
+import FlashCard from './flashcard'
 
-const cotoha = new Cotoha(DEVELOPER_API_CRIENT_ID, DEVELOPER_API_CRIENT_SECRET)
+const MICRO_CMS_API_KEY = "**********"
+const DEVELOPER_API_CRIENT_ID = "**********"
+const DEVELOPER_API_CRIENT_SECRET = "**********"
+
+const cotohaApi = new CotohaApi(DEVELOPER_API_CRIENT_ID, DEVELOPER_API_CRIENT_SECRET)
+const flashCard = new FlashCard(MICRO_CMS_API_KEY)
 
 export default {
 
   async asyncData () {
-
-    const questions = await getAllQuestions()
-    const question = await getQuestionAtRandom(questions)
-    const answer = await cotoha.getKeyword(question)
-    const emoticonQuestion = await convertEmoticonQuestion(question, answer)
+    const questions = await flashCard.getAllQuestions()
+    const question = await flashCard.getQuestionAtRandom(questions)
+    const answer = await cotohaApi.getKeyword(question)
+    const emoticonQuestion = await flashCard.convertEmoticonQuestion(question, answer)
 
     return {
       questions : questions,
@@ -43,40 +42,14 @@ export default {
 
   methods: {
     nextQuestion: async function() {
-      const question = await getQuestionAtRandom(this.questions)
-      const answer = await cotoha.getKeyword(question)
-      const emoticonQuestion = await convertEmoticonQuestion(question, answer)
+      const question = await flashCard.getQuestionAtRandom(this.questions)
+      const answer = await cotohaApi.getKeyword(question)
+      const emoticonQuestion = await flashCard.convertEmoticonQuestion(question, answer)
 
       this.question = emoticonQuestion
       this.answer = answer
     }
   }
-}
-
-async function getAllQuestions()
-{
-  const apiHeaders = {
-    headers:{
-      "X-API-KEY": MICRO_CMS_API_KEY
-    }
-  }
-
-  const questionResult = await axios.get(MICRO_CMS_QUESTION_URL, apiHeaders)
-  const contents = Enumerable.from(questionResult.data.contents)
-  const questions = contents.select(c => c.question).toArray()
-  return questions
-}
-
-async function getQuestionAtRandom(questions)
-{
-  const index = Math.floor(Math.random() * questions.length)
-  return questions[index]
-}
-
-async function convertEmoticonQuestion(question, answer)
-{
-  const emoticonQuestion = question.replace(answer, "＼(^o^)／")
-  return emoticonQuestion
 }
 
 </script>

@@ -1,17 +1,16 @@
 import axios from 'axios'
 
-export default class Cotoha
-{
+export default class CotohaApi {
+
   DEVELOPER_API_KEYWORD_URL = "https://api.ce-cotoha.com/api/dev/nlp/v1/keyword"
   ACCESS_TOKEN_PUBLISH_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens"
 
-  constructor(crientId, crientSecret){
+  constructor(crientId, crientSecret) {
     this.crientId = crientId
     this.crientSecret = crientSecret
   }
 
-  async getAccessToken()
-  {
+  async getAccessToken() {
     const tokenHeaders = {
       headers:{
         "Content-Type": "application/json"
@@ -29,10 +28,9 @@ export default class Cotoha
     return accessToken
   }
   
-  async getKeyword(document, keywordNum = 1)
-  {
+  async getKeyword(document, keywordNum = 1) {
     const token = await this.getAccessToken()
-  
+
     const parseHeaders = {
       headers:{
         "Content-Type": "application/json",
