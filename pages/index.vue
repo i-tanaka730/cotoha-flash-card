@@ -29,9 +29,9 @@ export default {
 
   async asyncData () {
     const questions = await flashCard.getAllQuestions()
-    const question = await flashCard.getQuestionAtRandom(questions)
+    const question = flashCard.getQuestionAtRandom(questions)
     const answer = await cotohaApi.getKeyword(question)
-    const emoticonQuestion = await flashCard.convertEmoticonQuestion(question, answer)
+    const emoticonQuestion = flashCard.convertEmoticonQuestion(question, answer)
 
     return {
       questions : questions,
@@ -42,9 +42,9 @@ export default {
 
   methods: {
     nextQuestion: async function() {
-      const question = await flashCard.getQuestionAtRandom(this.questions)
+      const question = flashCard.getQuestionAtRandom(this.questions)
       const answer = await cotohaApi.getKeyword(question)
-      const emoticonQuestion = await flashCard.convertEmoticonQuestion(question, answer)
+      const emoticonQuestion = flashCard.convertEmoticonQuestion(question, answer)
 
       this.question = emoticonQuestion
       this.answer = answer

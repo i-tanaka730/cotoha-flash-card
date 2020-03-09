@@ -2,6 +2,7 @@ import axios from 'axios'
 import Enumerable from 'linq'
 
 export default class FlashCard {
+
   MICRO_CMS_QUESTION_URL = "https://cotoha-flash-card.microcms.io/api/v1/question"
 
   constructor(microCmsKey) {
@@ -21,12 +22,12 @@ export default class FlashCard {
     return questions
   }
   
-  async getQuestionAtRandom(questions) {
+  getQuestionAtRandom(questions) {
     const index = Math.floor(Math.random() * questions.length)
     return questions[index]
   }
   
-  async convertEmoticonQuestion(question, answer) {
+  convertEmoticonQuestion(question, answer) {
     const emoticonQuestion = question.replace(answer, "＼(^o^)／")
     return emoticonQuestion
   }
