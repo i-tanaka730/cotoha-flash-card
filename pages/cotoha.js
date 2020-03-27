@@ -17,13 +17,13 @@ export default class CotohaApi {
       }
     }
 
-    const tokenDatas = {
+    const tokenData = {
       "grantType": "client_credentials",
       "clientId": this.crientId,
       "clientSecret": this.crientSecret
     }
   
-    const tokenResult = await axios.post(this.ACCESS_TOKEN_PUBLISH_URL, tokenDatas, tokenHeaders)
+    const tokenResult = await axios.post(this.ACCESS_TOKEN_PUBLISH_URL, tokenData, tokenHeaders)
     const accessToken = tokenResult.data.access_token
     return accessToken
   }
@@ -38,12 +38,12 @@ export default class CotohaApi {
       }
     }
   
-    const parseDatas = {
+    const parseData = {
       "document": document,
       "max_keyword_num": keywordNum
     }
   
-    const parseResult = await axios.post(this.DEVELOPER_API_KEYWORD_URL, parseDatas, parseHeaders)
+    const parseResult = await axios.post(this.DEVELOPER_API_KEYWORD_URL, parseData, parseHeaders)
     const keyword = parseResult.data.result[0].form
     return keyword
   } 
